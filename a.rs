@@ -160,7 +160,9 @@ fn try_once(
     v: &[Vec<char>],
     h: &[Vec<char>],
     rng: &mut Rng,
+    cutoff: u32,
 ) -> (u32, Vec<Vec<char>>, Vec<usize>) {
+    let max_turns = 3 * n * n - cutoff as usize;
     let mut alloc = vec![vec!['D'; k]; m];
     for i in 0..m {
         for j in 0..10 {
@@ -172,7 +174,7 @@ fn try_once(
         }
     }
     let mut ops = vec![];
-    for _ in 0..2 * n * n {
+    for _ in 0..max_turns {
         let (now_bb, now_pts) = calc_bitboard(ij, v, h, &alloc, &ops);
         if (0..n).all(|x| now_bb[x] == (1 << n) - 1) {
             break;
@@ -223,8 +225,8 @@ fn main() {
     let mut best_score = 0;
     let mut best_alloc = vec![vec!['D'; k]; m];
     let mut best_ops = vec![];
-    for _ in 0..50 {
-        let (score, alloc, ops) = try_once(n, m, k, &ij, &v, &h, &mut rng);
+    for _ in 0..130 {
+        let (score, alloc, ops) = try_once(n, m, k, &ij, &v, &h, &mut rng, best_score);
         if score > best_score {
             best_score = score;
             best_alloc = alloc;

@@ -1,4 +1,11 @@
 # タイムライン
+- <https://atcoder.jp/contests/ahc052/submissions/68711145>
+  - 367341
+  - 多点スタートの個数を 50 -> 130 にした
+  - ターン数が多すぎる場合は途中でやめた
+- <https://atcoder.jp/contests/ahc052/submissions/68710915>
+  - 多点スタートの個数を 50 -> 150 にした
+  - TLE
 - [discarded] <https://atcoder.jp/contests/ahc052/submissions/68710684> <https://atcoder.jp/contests/ahc052/submissions/68710465>
   - 366550
   - UD も LR も混ぜた
@@ -26,4 +33,4 @@
 
 # コンテスト終了直前にやること
 
-- [ ] 多点スタート (alloc を複数通り)
+- [x] 多点スタート (alloc を複数通り)
