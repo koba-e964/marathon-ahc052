@@ -36,11 +36,6 @@ macro_rules! read_value {
     ($next:expr, chars) => {
         read_value!($next, String).chars().collect::<Vec<char>>()
     };
-    ($next:expr, usize1) => (read_value!($next, usize) - 1);
-    ($next:expr, [ $t:tt ]) => {{
-        let len = read_value!($next, usize);
-        read_value!($next, [$t; len])
-    }};
     ($next:expr, $t:ty) => ($next().parse::<$t>().expect("Parse error"));
 }
 
@@ -179,9 +174,14 @@ fn main() {
     let mut rng = Rng { x: 0xdead_c0de_0013_3331u64 };
     let mut alloc = vec![vec!['D'; k]; m];
     for i in 0..m {
-        for j in 0..k {
-            let r = rng.next() as usize % 5;
-            alloc[i][j] = b"UDLRS"[r] as char;
+        for j in 0..5 {
+            for x in 0..2 {
+                alloc[i][j * 2 + x] = b"UDLRS"[j] as char;
+            }
+        }
+        for j in 1..k {
+            let r = rng.next() as usize % (j + 1);
+            alloc[i].swap(r, j);
         }
     }
     let mut ops = vec![];
