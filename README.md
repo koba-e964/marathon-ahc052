@@ -1,7 +1,10 @@
 # タイムライン
+- <https://atcoder.jp/contests/ahc052/submissions/68712508>
+  - 367630
+  - 100 + 68
 - <https://atcoder.jp/contests/ahc052/submissions/68711858>
-  -
-  - 多点スタートを途中でやめて山登り
+  - 367526
+  - 多点スタートを途中でやめて山登り (50 + 110)
 - <https://atcoder.jp/contests/ahc052/submissions/68711402>
   - 367473
   - 130 -> 160

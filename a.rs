@@ -236,7 +236,7 @@ fn main() {
     let mut best_score = 0;
     let mut best_alloc = vec![vec!['D'; k]; m];
     let mut best_ops = vec![];
-    for _ in 0..50 {
+    for _ in 0..100 {
         let (score, alloc, ops) = try_once(n, m, k, &ij, &v, &h, &mut rng, best_score);
         if score > best_score {
             eprintln!("start: {best_score} -> {score}");
@@ -245,7 +245,7 @@ fn main() {
             best_ops = ops;
         }
     }
-    for _ in 0..110 {
+    for _ in 0..68 {
         let mut alloc = best_alloc.to_vec();
         let idx = rng.next() as usize % m;
         let x = rng.next() as usize % k;
