@@ -154,6 +154,56 @@ fn calc_distance(
     dist
 }
 
+fn try_once(
+    n: usize, m: usize, k: usize,
+    ij: &[(usize, usize)],
+    v: &[Vec<char>],
+    h: &[Vec<char>],
+    rng: &mut Rng,
+) -> (u32, Vec<Vec<char>>, Vec<usize>) {
+    let mut alloc = vec![vec!['D'; k]; m];
+    for i in 0..m {
+        for j in 0..5 {
+            for x in 0..2 {
+                alloc[i][j * 2 + x] = b"UDLRS"[j] as char;
+            }
+        }
+        for j in 1..k {
+            let r = rng.next() as usize % (j + 1);
+            alloc[i].swap(r, j);
+        }
+    }
+    let mut ops = vec![];
+    for _ in 0..2 * n * n {
+        let (now_bb, now_pts) = calc_bitboard(ij, v, h, &alloc, &ops);
+        if (0..n).all(|x| now_bb[x] == (1 << n) - 1) {
+            break;
+        }
+        let dist = calc_distance(v, h, &now_bb);
+        let mut best = (vec![1 << 30], 0);
+        for i in 0..k {
+            let mut sum = vec![];
+            for j in 0..m {
+                let np = try_move(now_pts[j].0, now_pts[j].1, v, h, alloc[j][i]);
+                let np = np.unwrap_or(now_pts[j]);
+                sum.push(dist[np.0][np.1]);
+            }
+            sum.sort_unstable();
+            best = best.min((sum, i));
+        }
+        ops.push(best.1);
+    }
+    let (bitboard, _) = calc_bitboard(ij, v, h, &alloc, &ops);
+    let mut score = 0;
+    for i in 0..n {
+        score += bitboard[i].count_ones();
+    }
+    if score as usize == n * n {
+        score = (3 * n * n - ops.len()) as u32;
+    }
+    (score, alloc, ops)
+}
+
 fn main() {
     let out = std::io::stdout();
     let mut out = BufWriter::new(out.lock());
@@ -172,56 +222,27 @@ fn main() {
         h: [chars; n - 1],
     }
     let mut rng = Rng { x: 0xdead_c0de_0013_3331u64 };
-    let mut alloc = vec![vec!['D'; k]; m];
-    for i in 0..m {
-        for j in 0..5 {
-            for x in 0..2 {
-                alloc[i][j * 2 + x] = b"UDLRS"[j] as char;
-            }
-        }
-        for j in 1..k {
-            let r = rng.next() as usize % (j + 1);
-            alloc[i].swap(r, j);
+    let mut best_score = 0;
+    let mut best_alloc = vec![vec!['D'; k]; m];
+    let mut best_ops = vec![];
+    for _ in 0..50 {
+        let (score, alloc, ops) = try_once(n, m, k, &ij, &v, &h, &mut rng);
+        if score > best_score {
+            best_score = score;
+            best_alloc = alloc;
+            best_ops = ops;
         }
     }
-    let mut ops = vec![];
-    for i in 0..2 * n * n {
-        let (now_bb, now_pts) = calc_bitboard(&ij, &v, &h, &alloc, &ops[..i]);
-        if (0..n).all(|x| now_bb[x] == (1 << n) - 1) {
-            break;
-        }
-        let dist = calc_distance(&v, &h, &now_bb);
-        let mut best = (vec![1 << 30], 0);
-        for i in 0..k {
-            let mut sum = vec![];
-            for j in 0..m {
-                let np = try_move(now_pts[j].0, now_pts[j].1, &v, &h, alloc[j][i]);
-                let np = np.unwrap_or(now_pts[j]);
-                sum.push(dist[np.0][np.1]);
-            }
-            sum.sort_unstable();
-            best = best.min((sum, i));
-        }
-        ops.push(best.1);
-    }
-    let (bitboard, _) = calc_bitboard(&ij, &v, &h, &alloc, &ops);
-    let mut score = 0;
-    for i in 0..n {
-        score += bitboard[i].count_ones();
-    }
-    if score as usize == n * n {
-        score = (3 * n * n - ops.len()) as u32;
-    }
-    eprintln!("score = {score}");
+    eprintln!("score = {best_score}");
     // emit ans
     for i in 0..k {
         let mut tmp = vec![];
         for j in 0..m {
-            tmp.push(alloc[j][i]);
+            tmp.push(best_alloc[j][i]);
         }
         putvec!(tmp);
     }
-    for o in ops {
+    for o in best_ops {
         puts!("{o}\n");
     }
 }
