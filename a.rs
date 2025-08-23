@@ -163,10 +163,8 @@ fn try_once(
 ) -> (u32, Vec<Vec<char>>, Vec<usize>) {
     let mut alloc = vec![vec!['D'; k]; m];
     for i in 0..m {
-        for j in 0..5 {
-            for x in 0..2 {
-                alloc[i][j * 2 + x] = b"UDLRS"[j] as char;
-            }
+        for j in 0..10 {
+            alloc[i][j] = b"UDLR"[j % 4] as char;
         }
         for j in 1..k {
             let r = rng.next() as usize % (j + 1);
