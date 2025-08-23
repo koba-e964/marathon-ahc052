@@ -49,15 +49,6 @@ struct Rng {
 }
 
 impl Rng {
-    fn new() -> Self {
-        use std::hash::{Hasher, BuildHasher};
-        let hm = std::collections::HashMap::<i32, i32>::new();
-        let mut hash = hm.hasher().build_hasher();
-        hash.write_u32(8128);
-        Rng {
-            x: hash.finish(),
-        }
-    }
     fn next(&mut self) -> u32 {
         let a = 0xdead_c0de_0013_3331u64;
         let b = 2457;
@@ -74,21 +65,50 @@ impl<T: PartialOrd> Change for T {
     fn chmin(&mut self, x: T) { if *self > x { *self = x; } }
 }
 
-fn main() {
-    // In order to avoid potential stack overflow, spawn a new thread.
-    let stack_size = 104_857_600; // 100 MB
-    let thd = std::thread::Builder::new().stack_size(stack_size);
-    thd.spawn(|| solve()).unwrap().join().unwrap();
+fn calc_bitboard(
+    ij: &[(usize, usize)], v: &[Vec<char>], h: &[Vec<char>],
+    alloc: &[Vec<char>], ops: &[usize],
+) -> Vec<u32> {
+    let n = 30;
+    let mut bitboard = vec![0; n];
+    for (i, row) in alloc.iter().enumerate() {
+        let (mut x, mut y) = ij[i];
+        for &o in ops {
+            bitboard[x] |= 1 << y;
+            let letter = row[o];
+            let (nx, ny) = match letter {
+                'U' => (x.wrapping_sub(1), y),
+                'D' => (x.wrapping_add(1), y),
+                'L' => (x, y.wrapping_sub(1)),
+                'R' => (x, y.wrapping_add(1)),
+                'S' => (x, y),
+                _ => unreachable!(),
+            };
+            if nx >= n || ny >= n {
+                continue;
+            }
+            let is_blocked = match letter {
+                'U' => h[nx][y] == '1',
+                'D' => h[x][y] == '1',
+                'L' => v[x][ny] == '1',
+                'R' => v[x][y] == '1',
+                'S' => false,
+                _ => panic!(),
+            };
+            if !is_blocked {
+                x = nx;
+                y = ny;
+            }
+        }
+        bitboard[x] |= 1 << y;
+    }
+    bitboard
 }
 
-fn solve() {
-    #[allow(unused)]
+fn main() {
     let out = std::io::stdout();
-    #[allow(unused)]
     let mut out = BufWriter::new(out.lock());
-    #[allow(unused)]
     macro_rules! puts {($($format:tt)*) => (let _ = write!(out,$($format)*););}
-    #[allow(unused)]
     macro_rules! putvec {
         ($v:expr) => {
             for i in 0..$v.len() {
@@ -114,9 +134,19 @@ fn solve() {
     for i in 0..2 * n * n {
         ops[i] = rng.next() as usize % k;
     }
+    let bitboard = calc_bitboard(&ij, &v, &h, &alloc, &ops);
+    let mut score = 0;
+    for i in 0..n {
+        score += bitboard[i].count_ones();
+    }
+    eprintln!("score = {score}");
     // emit ans
-    for i in 0..m {
-        putvec!(alloc[i]);
+    for i in 0..k {
+        let mut tmp = vec![];
+        for j in 0..m {
+            tmp.push(alloc[j][i]);
+        }
+        putvec!(tmp);
     }
     for o in ops {
         puts!("{o}\n");
