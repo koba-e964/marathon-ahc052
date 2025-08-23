@@ -184,26 +184,33 @@ fn main() {
             alloc[i][j] = b"UDLRS"[r] as char;
         }
     }
-    let mut ops = vec![0; 2 * n * n];
+    let mut ops = vec![];
     for i in 0..2 * n * n {
         let (now_bb, now_pts) = calc_bitboard(&ij, &v, &h, &alloc, &ops[..i]);
+        if (0..n).all(|x| now_bb[x] == (1 << n) - 1) {
+            break;
+        }
         let dist = calc_distance(&v, &h, &now_bb);
-        let mut best = (1 << 30, 0);
+        let mut best = (vec![1 << 30], 0);
         for i in 0..k {
-            let mut sum = 0;
+            let mut sum = vec![];
             for j in 0..m {
                 let np = try_move(now_pts[j].0, now_pts[j].1, &v, &h, alloc[j][i]);
                 let np = np.unwrap_or(now_pts[j]);
-                sum += dist[np.0][np.1];
+                sum.push(dist[np.0][np.1]);
             }
+            sum.sort_unstable();
             best = best.min((sum, i));
         }
-        ops[i] = best.1;
+        ops.push(best.1);
     }
     let (bitboard, _) = calc_bitboard(&ij, &v, &h, &alloc, &ops);
     let mut score = 0;
     for i in 0..n {
         score += bitboard[i].count_ones();
+    }
+    if score as usize == n * n {
+        score = (3 * n * n - ops.len()) as u32;
     }
     eprintln!("score = {score}");
     // emit ans
