@@ -1,4 +1,10 @@
 # タイムライン
+- <https://atcoder.jp/contests/ahc052/submissions/68711858>
+  -
+  - 多点スタートを途中でやめて山登り
+- <https://atcoder.jp/contests/ahc052/submissions/68711402>
+  - 367473
+  - 130 -> 160
 - <https://atcoder.jp/contests/ahc052/submissions/68711145>
   - 367341
   - 多点スタートの個数を 50 -> 130 にした

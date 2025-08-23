@@ -162,7 +162,6 @@ fn try_once(
     rng: &mut Rng,
     cutoff: u32,
 ) -> (u32, Vec<Vec<char>>, Vec<usize>) {
-    let max_turns = 3 * n * n - cutoff as usize;
     let mut alloc = vec![vec!['D'; k]; m];
     for i in 0..m {
         for j in 0..10 {
@@ -173,6 +172,18 @@ fn try_once(
             alloc[i].swap(r, j);
         }
     }
+    try_once_with_alloc(n, m, k, ij, v, h, &alloc, cutoff)
+}
+
+fn try_once_with_alloc(
+    n: usize, m: usize, k: usize,
+    ij: &[(usize, usize)],
+    v: &[Vec<char>],
+    h: &[Vec<char>],
+    alloc: &[Vec<char>],
+    cutoff: u32,
+) -> (u32, Vec<Vec<char>>, Vec<usize>) {
+    let max_turns = 3 * n * n - cutoff as usize;
     let mut ops = vec![];
     for _ in 0..max_turns {
         let (now_bb, now_pts) = calc_bitboard(ij, v, h, &alloc, &ops);
@@ -201,7 +212,7 @@ fn try_once(
     if score as usize == n * n {
         score = (3 * n * n - ops.len()) as u32;
     }
-    (score, alloc, ops)
+    (score, alloc.to_vec(), ops)
 }
 
 fn main() {
@@ -225,9 +236,25 @@ fn main() {
     let mut best_score = 0;
     let mut best_alloc = vec![vec!['D'; k]; m];
     let mut best_ops = vec![];
-    for _ in 0..130 {
+    for _ in 0..50 {
         let (score, alloc, ops) = try_once(n, m, k, &ij, &v, &h, &mut rng, best_score);
         if score > best_score {
+            eprintln!("start: {best_score} -> {score}");
+            best_score = score;
+            best_alloc = alloc;
+            best_ops = ops;
+        }
+    }
+    for _ in 0..110 {
+        let mut alloc = best_alloc.to_vec();
+        let idx = rng.next() as usize % m;
+        let x = rng.next() as usize % k;
+        let y = rng.next() as usize % (k - 1) + 1;
+        let y = (x + y) % k;
+        alloc[idx].swap(x, y);
+        let (score, alloc, ops) = try_once_with_alloc(n, m, k, &ij, &v, &h, &alloc, best_score);
+        if score > best_score {
+            eprintln!("climb: {best_score} -> {score}");
             best_score = score;
             best_alloc = alloc;
             best_ops = ops;
