@@ -1,4 +1,7 @@
 # タイムライン
+- [discarded] <https://atcoder.jp/contests/ahc052/submissions/68710684> <https://atcoder.jp/contests/ahc052/submissions/68710465>
+  - 366550
+  - UD も LR も混ぜた
 - <https://atcoder.jp/contests/ahc052/submissions/68710229>
   - 366629
   - 405000 - 366629 = 38371, 38371 / 150 ~= 255.80666666666667
