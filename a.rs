@@ -1,16 +1,11 @@
-#[allow(unused_imports)]
-use std::cmp::*;
-#[allow(unused_imports)]
 use std::collections::*;
-#[allow(unused_imports)]
-use std::io::{Write, BufWriter};
+use std::io::{Write, BufWriter, Read};
 // https://qiita.com/tanakh/items/0ba42c7ca36cd29d0ac8
 macro_rules! input {
-    ($($r:tt)*) => {
-        let stdin = std::io::stdin();
-        let mut bytes = std::io::Read::bytes(std::io::BufReader::new(stdin.lock()));
+    ($s:expr, $($r:tt)*) => {
+        let mut bytes = $s.bytes();
         let mut next = move || -> String{
-            bytes.by_ref().map(|r|r.unwrap() as char)
+            bytes.by_ref().map(|r|r as char)
                 .skip_while(|c|c.is_whitespace())
                 .take_while(|c|!c.is_whitespace())
                 .collect()
@@ -226,7 +221,14 @@ fn main() {
             }
         }
     }
+    let args: Vec<_> = std::env::args().collect();
+    let istream = if args.len() >= 2 {
+        std::fs::read_to_string(&args[1]).unwrap()
+    } else {
+        std::io::Read::by_ref(&mut std::io::stdin()).bytes().map(|b| b.unwrap() as char).collect()
+    };
     input! {
+        istream,
         n: usize, m: usize, k: usize,
         ij: [(usize, usize); m],
         v: [chars; n],
