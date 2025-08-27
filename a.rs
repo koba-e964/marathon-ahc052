@@ -112,14 +112,31 @@ fn calc_bitboard(
 fn calc_distance(
     v: &[Vec<char>], h: &[Vec<char>],
     bitboard: &[u32],
+    que: &mut VecDeque<(i32, usize, usize)>,
 ) -> Vec<Vec<i32>> {
     let n = 30;
     let mut dist = vec![vec![1000; n]; n];
-    let mut que = VecDeque::new();
     for i in 0..n {
         for j in 0..n {
             if (bitboard[i] >> j) & 1 == 0 {
-                que.push_back((0, i, j));
+                let mut pushing = false;
+                if i > 0 && (bitboard[i - 1] >> j) & 1 == 1 {
+                    pushing = true;
+                }
+                if i + 1 < n && (bitboard[i + 1] >> j) & 1 == 1 {
+                    pushing = true;
+                }
+                if (bitboard[i] >> j) & 3 != 0 {
+                    pushing = true;
+                }
+                if j > 0 && (bitboard[i] >> (j - 1)) & 1 == 1 {
+                    pushing = true;
+                }
+                if pushing {
+                    que.push_back((0, i, j));
+                } else {
+                    dist[i][j] = 0;
+                }
             }
         }
     }
@@ -180,12 +197,13 @@ fn try_once_with_alloc(
 ) -> (u32, Vec<Vec<char>>, Vec<usize>) {
     let max_turns = 3 * n * n - cutoff as usize;
     let mut ops = vec![];
+    let mut que = VecDeque::new();
     for _ in 0..max_turns {
         let (now_bb, now_pts) = calc_bitboard(ij, v, h, &alloc, &ops);
         if (0..n).all(|x| now_bb[x] == (1 << n) - 1) {
             break;
         }
-        let dist = calc_distance(v, h, &now_bb);
+        let dist = calc_distance(v, h, &now_bb, &mut que);
         let mut best = (vec![1 << 30], 0);
         for i in 0..k {
             let mut sum = vec![];
