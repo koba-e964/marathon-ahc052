@@ -272,6 +272,9 @@ fn main() {
         let y = rng.next() as usize % (k - 1) + 1;
         let y = (x + y) % k;
         alloc[idx].swap(x, y);
+        let idx = idx + (rng.next() as usize % (m - 1)) + 1;
+        let idx = idx % m;
+        alloc[idx].swap(x, y);
         let (score, alloc, ops) = try_once_with_alloc(n, m, k, &ij, &v, &h, &alloc, best_score);
         if score > best_score {
             eprintln!("climb: {best_score} -> {score}");
