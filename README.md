@@ -1,4 +1,7 @@
 # タイムライン
+- <https://atcoder.jp/contests/ahc052/submissions/68843067>
+  - 延長戦
+  - 367867
 - <https://atcoder.jp/contests/ahc052/submissions/68712508>
   - 367630
   - 100 + 68
